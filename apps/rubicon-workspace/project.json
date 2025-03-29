@@ -1,0 +1,81 @@
+{
+  "name": "rubicon-workspace",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/rubicon-workspace/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/rubicon-workspace",
+        "index": "apps/rubicon-workspace/src/index.html",
+        "browser": "apps/rubicon-workspace/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/rubicon-workspace/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/rubicon-workspace/public"
+          }
+        ],
+        "styles": ["apps/rubicon-workspace/src/styles.css"],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "rubicon-workspace:build:production"
+        },
+        "development": {
+          "buildTarget": "rubicon-workspace:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "rubicon-workspace:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "rubicon-workspace:build",
+        "staticFilePath": "dist/apps/rubicon-workspace/browser",
+        "spa": true
+      }
+    }
+  }
+}
