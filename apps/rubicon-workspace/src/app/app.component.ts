@@ -7,7 +7,6 @@ import {
 } from '@openfin/workspace-platform';
 import {
   Dock,
-  DockButtonNames,
   DockProvider, DockProviderRegistration,
   Home,
   Storefront,
@@ -16,7 +15,8 @@ import {
 } from '@openfin/workspace';
 import { OpenFin } from '@openfin/core';
 
-import { WorkspacePlatformOverrideService } from './workspace-platform-override.service';
+import { WorkspacePlatformOverrideService } from './services/workspace-platform-override.service';
+import { DockProviderService } from './services/dock-provider.service';
 
 
 const PLATFORM_ID = "RubiconPlatform";
@@ -31,63 +31,15 @@ const PLATFORM_ICON = "http://localhost:4200/favicon.ico";
 export class AppComponent implements OnInit {
   title = 'rubicon-workspace';
 
-  dockProvider: DockProvider = {
-    id: PLATFORM_ID,
-    title: PLATFORM_TITLE,
-    icon: 'https://www.openfin.co/favicon-32x32.png',
-    workspaceComponents: ['home', 'notifications', 'store', 'switchWorkspace'],
-    disableUserRearrangement: false,
-    buttons: [
-      {
-        tooltip: 'Sample Button 1',
-        iconUrl: 'https://www.openfin.co/favicon-32x32.png',
-        action: {
-          id: 'sampleButton1',
-        },
-      },
-      {
-        type: DockButtonNames.DropdownButton,
-        tooltip: 'Sample Dropdown Button',
-        iconUrl: 'https://www.openfin.co/favicon-32x32.png',
-        options: [
-          {
-            tooltip: 'Dropdown Button 1',
-            iconUrl: 'https://www.openfin.co/favicon-32x32.png',
-            action: {
-              id: 'dropdownButton1',
-              customData: 'dropdownButton1 clicked',
-            },
-          },
-          {
-            tooltip: 'Dropdown Button 2',
-            iconUrl: 'https://www.openfin.co/favicon-32x32.png',
-            action: {
-              id: 'dropdownButton2',
-              customData: 'dropdownButton2 clicked',
-            },
-          },
-          {
-            tooltip: 'Button with sub-options',
-            options: [
-              {
-                tooltip: 'Nested button 1',
-                iconUrl: 'https://www.openfin.co/favicon-32x32.png',
-                action: {
-                  id: 'nestedButton1',
-                  customData: 'nestedButton1 clicked',
-                },
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  };
   private registration: DockProviderRegistration | undefined;
   private currentView: OpenFin.View | undefined;
   private currentUrl: string | undefined;
+  private dockProvider: DockProvider | undefined;
 
-  constructor(private workspacePlatformOverride: WorkspacePlatformOverrideService) {
+  constructor(
+    private workspacePlatformOverride: WorkspacePlatformOverrideService,
+    private dockProviderService: DockProviderService
+  ) {
     console.log('Rubicon Workspace constructor');
   }
 
@@ -95,11 +47,28 @@ export class AppComponent implements OnInit {
     console.log('Initializing Rubicon Workspace');
     // Initialize the workspace platform
     // Provide default icons and default theme for the browser windows
+
+    this.dockProviderService.getDockConfig().then((config) => {
+      console.log('Dock config loaded', config);
+      this.dockProvider = config;
+      this.InitializeRubiconWorkspace()
+        .then(() => {
+          console.log('Rubicon Workspace initialized');
+        })
+        .catch((err) => {
+          console.error('Error initializing Rubicon Workspace', err);
+        });
+    })
+
+
+  }
+
+
+  private async InitializeRubiconWorkspace() {
     this.initializeWorkspacePlatform()
       .then((platform) => {
         console.log('Workspace platform initialized', platform);
 
-        // Initialize dummy workspace components so that the buttons show in the dock.
         this.initializeWorkspaceComponents()
           .then((platform) => {
             console.log('Workspace components initialized', platform);
@@ -109,7 +78,8 @@ export class AppComponent implements OnInit {
       .catch(console.error);
   }
 
-  dockGetCustomActions(): CustomActionsMap {
+
+  private dockGetCustomActions(): CustomActionsMap {
     return {
       sampleButton1: async (): Promise<void> => {
         // The favorite open is triggered when the entry in the dock is clicked
@@ -119,7 +89,7 @@ export class AppComponent implements OnInit {
     };
   }
 
-  async openUrl(url: string): Promise<void> {
+  private async openUrl(url: string): Promise<void> {
     const platform = getCurrentSync();
 
     // See if we already have a browser window open.
@@ -183,7 +153,6 @@ export class AppComponent implements OnInit {
     console.log('Initializing workspace platform');
     // Add your platform initialization logic here
 
-
     await init({
       browser: {
         defaultWindowOptions: {
@@ -211,8 +180,6 @@ export class AppComponent implements OnInit {
       // Override some of the platform callbacks to provide loading
       // and saving to custom storage
       overrideCallback: this.workspacePlatformOverride.overrideCallback,
-
-
     });
   }
 
@@ -253,7 +220,9 @@ export class AppComponent implements OnInit {
     // Perform the dock registration which will configure
     // it and add the buttons/menus
     try {
-      this.registration = await Dock.register(this.dockProvider);
+      if (this.dockProvider) {
+        this.registration = await Dock.register(this.dockProvider);
+      }
       console.log(this.registration);
       console.log('Dock provider initialized.');
     } catch (err) {
@@ -264,7 +233,4 @@ export class AppComponent implements OnInit {
     }
     await Dock.show();
   }
-
-
-
 }

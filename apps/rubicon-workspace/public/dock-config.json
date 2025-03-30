@@ -1,0 +1,57 @@
+{
+  "id": "RubiconPlatform",
+  "title": "Rubicon Workspace",
+  "icon": "https://www.openfin.co/favicon-32x32.png",
+  "workspaceComponents": [
+    "home",
+    "notifications",
+    "store",
+    "switchWorkspace"
+  ],
+  "disableUserRearrangement": false,
+  "buttons": [
+    {
+      "tooltip": "Sample Button 1",
+      "iconUrl": "https://www.openfin.co/favicon-32x32.png",
+      "action": {
+        "id": "sampleButton1"
+      }
+    },
+    {
+      "type": "DropdownButton",
+      "tooltip": "Sample Dropdown Button",
+      "iconUrl": "https://www.openfin.co/favicon-32x32.png",
+      "options": [
+        {
+          "tooltip": "Dropdown Button 1",
+          "iconUrl": "https://www.openfin.co/favicon-32x32.png",
+          "action": {
+            "id": "dropdownButton1",
+            "customData": "dropdownButton1 clicked"
+          }
+        },
+        {
+          "tooltip": "Dropdown Button 2",
+          "iconUrl": "https://www.openfin.co/favicon-32x32.png",
+          "action": {
+            "id": "dropdownButton2",
+            "customData": "dropdownButton2 clicked"
+          }
+        },
+        {
+          "tooltip": "Button with sub-options",
+          "options": [
+            {
+              "tooltip": "Nested button 1",
+              "iconUrl": "https://www.openfin.co/favicon-32x32.png",
+              "action": {
+                "id": "nestedButton1",
+                "customData": "nestedButton1 clicked"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
