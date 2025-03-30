@@ -1,0 +1,6 @@
+{
+  "appSourceUrls": [
+  ],
+  "manifestTypes": ["view", "snapshot", "manifest", "external", "window", "inline-appasset"],
+  "cacheDurationInMinutes": 1
+}

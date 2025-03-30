@@ -1,0 +1,120 @@
+{
+  "id": "Rubicon Platform Store",
+  "title": "Rubicon Platform Store",
+  "icon": "http://localhost:8080/favicon.ico",
+  "landingPage": {
+    "hero": {
+      "title": "FX Workspace",
+      "description": "This is a demonstration of the hero section that you can configure for your store.",
+      "cta": {
+        "title": "FX Apps!",
+        "tags": ["hero"]
+      },
+      "image": {
+        "src": "http://localhost:8080/common/images/store/superhero-unsplash.jpg"
+      }
+    },
+    "topRow": {
+      "title": "FX E-Trading",
+      "items": [
+        {
+          "title": "FX D2D",
+          "description": "A collection of developer tools that can aid with building and debugging OpenFin applications.",
+          "image": {
+            "src": "http://localhost:8080/common/images/store/coding-2-unsplash.jpg"
+          },
+          "tags": ["tools"]
+        },
+        {
+          "title": "FX D2C",
+          "description": "A collection of developer documents that can aid with building and debugging OpenFin applications.",
+          "image": {
+            "src": "http://localhost:8080/common/images/store/coding-3-unsplash.jpg"
+          },
+          "tags": ["page"]
+        }
+      ]
+    },
+    "middleRow": {
+      "title": "A collection of simple views that show how to share context using the FDC3 or Interop APIs.",
+      "tags": ["fdc3", "interop"]
+    },
+    "bottomRow": {
+      "title": "Quick Access",
+      "items": [
+        {
+          "title": "Views",
+          "description": "A collection of views made available through our catalog.",
+          "image": {
+            "src": "http://localhost:8080/common/images/store/coding-4-unsplash.jpg"
+          },
+          "tags": ["view"]
+        },
+        {
+          "title": "Web Apps",
+          "description": "A collection of web apps built using OpenFin.",
+          "image": {
+            "src": "http://localhost:8080/common/images/store/coding-5-unsplash.jpg"
+          },
+          "tags": ["manifest"]
+        },
+        {
+          "title": "Native Apps",
+          "description": "A collection of native apps made available through our catalog.",
+          "image": {
+            "src": "http://localhost:8080/common/images/store/coding-6-unsplash.jpg"
+          },
+          "tags": ["native"]
+        }
+      ]
+    }
+  },
+  "navigation": [
+    {
+      "title": "FX Applications",
+      "items": [
+        {
+          "title": "All Apps",
+          "tags": ["view", "page", "manifest", "native"]
+        },
+        {
+          "title": "Favorites",
+          "tags": ["@favorites"]
+        },
+        { "title": "Views", "tags": ["view"] },
+        { "title": "Pages", "tags": ["page"] },
+        {
+          "title": "Native",
+          "tags": ["native"]
+        }
+      ]
+    },
+    {
+      "title": "Context Sharing",
+      "items": [
+        {
+          "title": "FDC3 API",
+          "tags": ["fdc3"]
+        },
+        {
+          "title": "Interop API",
+          "tags": ["interop"]
+        }
+      ]
+    }
+  ],
+  "footer": {
+    "logo": { "src": "http://localhost:8080/favicon.ico", "size": "32" },
+    "text": "Welcome to the FX Workspace Store",
+    "links": [
+      {
+        "title": "Github",
+        "url": "https://github.com/built-on-openfin/workspace-starter"
+      },
+      {
+        "title": "YouTube",
+        "url": "https://www.youtube.com/user/OpenFinTech"
+      }
+    ]
+  }
+}

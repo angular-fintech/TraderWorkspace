@@ -20,9 +20,12 @@ import {
 } from '@openfin/workspace';
 import { OpenFin } from '@openfin/core';
 
-import { WorkspacePlatformOverrideService } from '../services/workspace-platform-override.service';
-import { DockProviderService } from '../services/dock-provider.service';
+import { WorkspacePlatformOverrideService } from '../services/openfin/workspace-platform-override.service';
+import { DockProviderService } from '../services/openfin/dock-provider.service';
 import { LogService } from '../services/logger/log.service';
+import { StoreProviderService } from '../services/openfin/store-provider.service';
+import { AppProviderSettings } from '../models/AppProviderSettings';
+import { StorefrontProviderSettings } from '../models/StorefrontProviderSettings';
 
 
 const PLATFORM_ID = "RubiconPlatform";
@@ -45,9 +48,15 @@ export class AppComponent implements OnInit {
   private currentUrl: string | undefined;
   private dockProvider: DockProvider | undefined;
 
+  // @ts-ignore
+  private appProviderSettings: AppProviderSettings;
+  // @ts-ignore
+  private storefrontProviderSettings: StorefrontProviderSettings;
+
   constructor(
     private workspacePlatformOverride: WorkspacePlatformOverrideService,
     private dockProviderService: DockProviderService,
+    private storeProviderService: StoreProviderService,
     private logService: LogService
   ) {
     this.logService.info('Rubicon Workspace constructor');
@@ -58,9 +67,7 @@ export class AppComponent implements OnInit {
     // Initialize the workspace platform
     // Provide default icons and default theme for the browser windows
 
-    this.dockProviderService.getDockConfig().then((config) => {
-      this.logService.info('Dock config loaded', config);
-      this.dockProvider = config;
+    this.loadAllConfigs().then(() => {
       this.InitializeRubiconWorkspace()
         .then(() => {
           this.logService.info('Rubicon Workspace initialized');
@@ -68,11 +75,24 @@ export class AppComponent implements OnInit {
         .catch((err) => {
           console.error('Error initializing Rubicon Workspace', err);
         });
-    })
-
-
+    });
   }
 
+  private async loadAllConfigs() {
+    await this.loadDockConfig();
+    await this.loadStoreConfig();
+  }
+
+  private async loadStoreConfig() {
+    await this.storeProviderService.loadConfigs();
+    this.logService.info('Store provider initialized');
+    const storeConfigs = this.storeProviderService.getStoreConfigs();
+    this.appProviderSettings = storeConfigs.appProviderSettings;
+    this.storefrontProviderSettings = storeConfigs.storefrontProviderSettings;
+  }
+  private async loadDockConfig() {
+    this.dockProvider = await this.dockProviderService.getDockConfig();
+  }
 
   private async InitializeRubiconWorkspace() {
     this.initializeWorkspacePlatform()
@@ -88,12 +108,14 @@ export class AppComponent implements OnInit {
       .catch(console.error);
   }
 
-
   private dockGetCustomActions(): CustomActionsMap {
     return {
       sampleButton1: async (payload: CustomActionPayload): Promise<void> => {
         // The favorite open is triggered when the entry in the dock is clicked
-        this.logService.info('Custom Actions Map: sampleButton1 clicked : ', payload);
+        this.logService.info(
+          'Custom Actions Map: sampleButton1 clicked : ',
+          payload
+        );
         if (payload.callerType === CustomActionCallerType.CustomButton) {
           await this.openUrl(payload.customData);
         }
@@ -117,11 +139,14 @@ export class AppComponent implements OnInit {
     }
 
     // Open a view
-    const view = await platform.createView({
-      url: url,
-      name: 'New View',
-      title:'New View'
-    }, browserWindowTarget);
+    const view = await platform.createView(
+      {
+        url: url,
+        name: 'New View',
+        title: 'New View',
+      },
+      browserWindowTarget
+    );
     this.currentUrl = url;
     this.currentView = view;
 
@@ -181,37 +206,37 @@ export class AppComponent implements OnInit {
       },
       theme: [
         {
-          label: "Default",
-          default: "dark",
+          label: 'Default',
+          default: 'dark',
           palettes: {
             dark: {
-              brandPrimary: "#0A76D3",
-              brandSecondary: "#383A40",
-              backgroundPrimary: "#1E1F23"
+              brandPrimary: '#0A76D3',
+              brandSecondary: '#383A40',
+              backgroundPrimary: '#1E1F23',
             },
             light: {
-              brandPrimary: "#0A76D3",
-              brandSecondary: "#1E1F23",
-              backgroundPrimary: "#FAFBFE",
+              brandPrimary: '#0A76D3',
+              brandSecondary: '#1E1F23',
+              backgroundPrimary: '#FAFBFE',
               // Demonstrate changing the link color for notifications
-              linkDefault: "#FF0000",
-              linkHover: "#00FF00"
-            }
+              linkDefault: '#FF0000',
+              linkHover: '#00FF00',
+            },
           },
           notificationIndicatorColors: {
             // This custom indicator color will be used in the Notification with Custom Indicator
-            "custom-indicator": {
+            'custom-indicator': {
               dark: {
-                background: "#FF0000",
-                foreground: "#FFFFDD"
+                background: '#FF0000',
+                foreground: '#FFFFDD',
               },
               light: {
-                background: "#FF0000",
-                foreground: "#FFFFDD"
-              }
-            }
-          }
-        }
+                background: '#FF0000',
+                foreground: '#FFFFDD',
+              },
+            },
+          },
+        },
       ],
       // Get the custom actions from the dock which will be triggered
       // when the buttons are clicked
@@ -225,8 +250,8 @@ export class AppComponent implements OnInit {
       notificationsPlatformOptions: {
         id: PLATFORM_ID,
         icon: PLATFORM_ICON,
-        title: PLATFORM_TITLE
-      }
+        title: PLATFORM_TITLE,
+      },
     });
   }
 
@@ -250,14 +275,14 @@ export class AppComponent implements OnInit {
       title: PLATFORM_TITLE,
       id: PLATFORM_ID,
       icon: PLATFORM_ICON,
-      getApps: async () => [],
-      getLandingPage: async () => ({} as StorefrontLandingPage),
-      getNavigation: async () => [],
-      getFooter: async () =>
-        ({
-          logo: { src: PLATFORM_ICON },
-          links: [],
-        } as unknown as StorefrontFooter),
+      getApps: async () =>
+        this.storeProviderService.addButtons(
+          await this.storeProviderService.getApps(this.appProviderSettings)
+        ),
+      getLandingPage: async () => await this.storeProviderService.getLandingPage(this.appProviderSettings, this.storefrontProviderSettings),
+      getNavigation: async () => await this.storeProviderService.getNavigation(this.appProviderSettings, this.storefrontProviderSettings),
+      getFooter: async () => await this.storeProviderService.getFooter(this.storefrontProviderSettings),
+
       launchApp: async () => {
         // The favorite open is triggered when the entry in the dock is clicked
         this.logService.info('Storefront app launched');
@@ -270,7 +295,7 @@ export class AppComponent implements OnInit {
       if (this.dockProvider) {
         this.registration = await Dock.register(this.dockProvider);
       }
-      this.logService.info('Dock Registration:',this.registration);
+      this.logService.info('Dock Registration:', this.registration);
       this.logService.info('Dock provider initialized.');
     } catch (err) {
       console.error(
@@ -279,31 +304,29 @@ export class AppComponent implements OnInit {
       );
     }
     await Dock.show();
+    await Storefront.show();
   }
 
   showNotification($event: MouseEvent) {
-
     this.showSimpleNotification().then(() => {
       this.logService.info('Notification sent');
     });
-
   }
 
   async showSimpleNotification(): Promise<void> {
     const notification: Notifications.NotificationOptions = {
-      title: "Simple Notification",
-      body: "This is a simple notification",
-      toast: "transient",
-      category: "default",
-      template: "markdown",
+      title: 'Simple Notification',
+      body: 'This is a simple notification',
+      toast: 'transient',
+      category: 'default',
+      template: 'markdown',
       id: uuidv4(),
       soundOptions: {
-        mode: "silent"
+        mode: 'silent',
       },
-      platform: PLATFORM_ID
+      platform: PLATFORM_ID,
     };
 
     await Notifications.create(notification);
   }
-
 }

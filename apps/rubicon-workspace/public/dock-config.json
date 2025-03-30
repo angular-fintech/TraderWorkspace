@@ -1,6 +1,6 @@
 {
-  "id": "RubiconPlatform",
-  "title": "Rubicon Workspace",
+  "id": "RubiconPlatformDock",
+  "title": "Rubicon Workspace Dock",
   "icon": "https://www.openfin.co/favicon-32x32.png",
   "workspaceComponents": [
     "home",
