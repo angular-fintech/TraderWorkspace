@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import * as Notifications from "@openfin/workspace/notifications";
+import { v4 as uuidv4 } from 'uuid';
 
 import {
-  CustomActionsMap, getCurrentSync,
+  CustomActionCallerType,
+  CustomActionPayload,
+  CustomActionsMap,
+  getCurrentSync,
   init,
 } from '@openfin/workspace-platform';
 import {
@@ -15,13 +20,17 @@ import {
 } from '@openfin/workspace';
 import { OpenFin } from '@openfin/core';
 
-import { WorkspacePlatformOverrideService } from './services/workspace-platform-override.service';
-import { DockProviderService } from './services/dock-provider.service';
+import { WorkspacePlatformOverrideService } from '../services/workspace-platform-override.service';
+import { DockProviderService } from '../services/dock-provider.service';
+import { LogService } from '../services/logger/log.service';
 
 
 const PLATFORM_ID = "RubiconPlatform";
 const PLATFORM_TITLE = "Rubicon Workspace";
 const PLATFORM_ICON = "http://localhost:4200/favicon.ico";
+
+
+
 @Component({
   imports: [RouterModule],
   selector: 'app-root',
@@ -29,7 +38,7 @@ const PLATFORM_ICON = "http://localhost:4200/favicon.ico";
   styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit {
-  title = 'rubicon-workspace';
+  //title = 'rubicon-workspace';
 
   private registration: DockProviderRegistration | undefined;
   private currentView: OpenFin.View | undefined;
@@ -38,22 +47,23 @@ export class AppComponent implements OnInit {
 
   constructor(
     private workspacePlatformOverride: WorkspacePlatformOverrideService,
-    private dockProviderService: DockProviderService
+    private dockProviderService: DockProviderService,
+    private logService: LogService
   ) {
-    console.log('Rubicon Workspace constructor');
+    this.logService.info('Rubicon Workspace constructor');
   }
 
   ngOnInit(): void {
-    console.log('Initializing Rubicon Workspace');
+    this.logService.info('Initializing Rubicon Workspace');
     // Initialize the workspace platform
     // Provide default icons and default theme for the browser windows
 
     this.dockProviderService.getDockConfig().then((config) => {
-      console.log('Dock config loaded', config);
+      this.logService.info('Dock config loaded', config);
       this.dockProvider = config;
       this.InitializeRubiconWorkspace()
         .then(() => {
-          console.log('Rubicon Workspace initialized');
+          this.logService.info('Rubicon Workspace initialized');
         })
         .catch((err) => {
           console.error('Error initializing Rubicon Workspace', err);
@@ -67,11 +77,11 @@ export class AppComponent implements OnInit {
   private async InitializeRubiconWorkspace() {
     this.initializeWorkspacePlatform()
       .then((platform) => {
-        console.log('Workspace platform initialized', platform);
+        this.logService.info('Workspace platform initialized', platform);
 
         this.initializeWorkspaceComponents()
           .then((platform) => {
-            console.log('Workspace components initialized', platform);
+            this.logService.info('Workspace components initialized', platform);
           })
           .catch(console.error);
       })
@@ -81,10 +91,12 @@ export class AppComponent implements OnInit {
 
   private dockGetCustomActions(): CustomActionsMap {
     return {
-      sampleButton1: async (): Promise<void> => {
+      sampleButton1: async (payload: CustomActionPayload): Promise<void> => {
         // The favorite open is triggered when the entry in the dock is clicked
-        console.log('Custom Actions Map: sampleButton1 clicked');
-        await this.openUrl('https://www.openfin.co');
+        this.logService.info('Custom Actions Map: sampleButton1 clicked : ', payload);
+        if (payload.callerType === CustomActionCallerType.CustomButton) {
+          await this.openUrl(payload.customData);
+        }
       },
     };
   }
@@ -105,7 +117,11 @@ export class AppComponent implements OnInit {
     }
 
     // Open a view
-    const view = await platform.createView({ url }, browserWindowTarget);
+    const view = await platform.createView({
+      url: url,
+      name: 'New View',
+      title:'New View'
+    }, browserWindowTarget);
     this.currentUrl = url;
     this.currentView = view;
 
@@ -128,7 +144,7 @@ export class AppComponent implements OnInit {
           await browserWindows[0].openfinWindow.addListener(
             event,
             async (payload) => {
-              console.log(event, payload);
+              this.logService.info(event, payload);
               // If the view has switched focus or the url has changed
               // then we need to update the browser buttons
               if ('viewIdentity' in payload) {
@@ -150,7 +166,7 @@ export class AppComponent implements OnInit {
   }
 
   private async initializeWorkspacePlatform() {
-    console.log('Initializing workspace platform');
+    this.logService.info('Initializing workspace platform');
     // Add your platform initialization logic here
 
     await init({
@@ -165,14 +181,37 @@ export class AppComponent implements OnInit {
       },
       theme: [
         {
-          label: 'Default',
-          default: 'dark',
-          palette: {
-            brandPrimary: '#0A76D3',
-            brandSecondary: '#383A40',
-            backgroundPrimary: '#1E1F23',
+          label: "Default",
+          default: "dark",
+          palettes: {
+            dark: {
+              brandPrimary: "#0A76D3",
+              brandSecondary: "#383A40",
+              backgroundPrimary: "#1E1F23"
+            },
+            light: {
+              brandPrimary: "#0A76D3",
+              brandSecondary: "#1E1F23",
+              backgroundPrimary: "#FAFBFE",
+              // Demonstrate changing the link color for notifications
+              linkDefault: "#FF0000",
+              linkHover: "#00FF00"
+            }
           },
-        },
+          notificationIndicatorColors: {
+            // This custom indicator color will be used in the Notification with Custom Indicator
+            "custom-indicator": {
+              dark: {
+                background: "#FF0000",
+                foreground: "#FFFFDD"
+              },
+              light: {
+                background: "#FF0000",
+                foreground: "#FFFFDD"
+              }
+            }
+          }
+        }
       ],
       // Get the custom actions from the dock which will be triggered
       // when the buttons are clicked
@@ -181,10 +220,18 @@ export class AppComponent implements OnInit {
       // and saving to custom storage
       overrideCallback: this.workspacePlatformOverride.overrideCallback,
     });
+
+    await Notifications.register({
+      notificationsPlatformOptions: {
+        id: PLATFORM_ID,
+        icon: PLATFORM_ICON,
+        title: PLATFORM_TITLE
+      }
+    });
   }
 
   private async initializeWorkspaceComponents() {
-    console.log('Initializing components');
+    this.logService.info('Initializing components');
 
     // Dummy home which can be launched by the dock
     await Home.register({
@@ -194,7 +241,7 @@ export class AppComponent implements OnInit {
       onUserInput: async () => ({ results: [] }),
       onResultDispatch: async () => {
         // The favorite open is triggered when the entry in the dock is clicked
-        console.log('Home result dispatched');
+        this.logService.info('Home result dispatched');
       },
     });
 
@@ -213,7 +260,7 @@ export class AppComponent implements OnInit {
         } as unknown as StorefrontFooter),
       launchApp: async () => {
         // The favorite open is triggered when the entry in the dock is clicked
-        console.log('Storefront app launched');
+        this.logService.info('Storefront app launched');
       },
     });
 
@@ -223,8 +270,8 @@ export class AppComponent implements OnInit {
       if (this.dockProvider) {
         this.registration = await Dock.register(this.dockProvider);
       }
-      console.log(this.registration);
-      console.log('Dock provider initialized.');
+      this.logService.info('Dock Registration:',this.registration);
+      this.logService.info('Dock provider initialized.');
     } catch (err) {
       console.error(
         'An error was encountered while trying to register the content dock provider',
@@ -233,4 +280,30 @@ export class AppComponent implements OnInit {
     }
     await Dock.show();
   }
+
+  showNotification($event: MouseEvent) {
+
+    this.showSimpleNotification().then(() => {
+      this.logService.info('Notification sent');
+    });
+
+  }
+
+  async showSimpleNotification(): Promise<void> {
+    const notification: Notifications.NotificationOptions = {
+      title: "Simple Notification",
+      body: "This is a simple notification",
+      toast: "transient",
+      category: "default",
+      template: "markdown",
+      id: uuidv4(),
+      soundOptions: {
+        mode: "silent"
+      },
+      platform: PLATFORM_ID
+    };
+
+    await Notifications.create(notification);
+  }
+
 }

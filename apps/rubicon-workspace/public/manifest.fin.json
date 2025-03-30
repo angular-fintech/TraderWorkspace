@@ -9,7 +9,7 @@
 		"uuid": "RubiconOpenFinWorkspace",
 		"icon": "http://localhost:4200/favicon.ico",
 		"autoShow": true,
-		"providerUrl": "http://localhost:4200/index.html",
+		"providerUrl": "http://localhost:4200/app",
 		"preventQuitOnLastWindowClosed": true,
 		"permissions": {
 			"System": {

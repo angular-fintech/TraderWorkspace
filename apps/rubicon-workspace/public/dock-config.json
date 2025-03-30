@@ -14,7 +14,8 @@
       "tooltip": "Sample Button 1",
       "iconUrl": "https://www.openfin.co/favicon-32x32.png",
       "action": {
-        "id": "sampleButton1"
+        "id": "sampleButton1",
+        "customData": "http://localhost:4200/order"
       }
     },
     {
