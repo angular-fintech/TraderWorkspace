@@ -1,22 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import * as Notifications from "@openfin/workspace/notifications";
+import * as Notifications from '@openfin/workspace/notifications';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  BrowserButtonType,
+  ColorSchemeOptionType,
   CustomActionCallerType,
   CustomActionPayload,
   CustomActionsMap,
+  CustomPaletteSet,
   getCurrentSync,
   init,
+  ToolbarButton,
 } from '@openfin/workspace-platform';
 import {
   Dock,
-  DockProvider, DockProviderRegistration,
+  DockProvider,
+  DockProviderRegistration,
   Home,
   Storefront,
-  StorefrontFooter,
-  StorefrontLandingPage
 } from '@openfin/workspace';
 import { OpenFin } from '@openfin/core';
 
@@ -26,9 +29,9 @@ import { LogService } from '../services/logger/log.service';
 import { StoreProviderService } from '../services/openfin/store-provider.service';
 import { AppProviderSettings } from '../models/AppProviderSettings';
 import { StorefrontProviderSettings } from '../models/StorefrontProviderSettings';
+import { DEFAULT_PALETTES } from '../themes/default-palettes';
 
-
-const PLATFORM_ID = "RubiconPlatform";
+const PLATFORM_ID = 'RubiconPlatform';
 const PLATFORM_TITLE = "Rubicon Workspace";
 const PLATFORM_ICON = "http://localhost:4200/favicon.ico";
 
@@ -43,6 +46,10 @@ const PLATFORM_ICON = "http://localhost:4200/favicon.ico";
 export class AppComponent implements OnInit {
   //title = 'rubicon-workspace';
 
+
+  // @ts-ignore
+  private currentPalette: CustomPaletteSet;
+
   private registration: DockProviderRegistration | undefined;
   private currentView: OpenFin.View | undefined;
   private currentUrl: string | undefined;
@@ -52,6 +59,7 @@ export class AppComponent implements OnInit {
   private appProviderSettings: AppProviderSettings;
   // @ts-ignore
   private storefrontProviderSettings: StorefrontProviderSettings;
+  private currentColorScheme: any;
 
   constructor(
     private workspacePlatformOverride: WorkspacePlatformOverrideService,
@@ -102,10 +110,15 @@ export class AppComponent implements OnInit {
         this.initializeWorkspaceComponents()
           .then((platform) => {
             this.logService.info('Workspace components initialized', platform);
+            // this.initColorScheme().then(() => {
+            //   this.logService.info('Color scheme initialized');
+            // });
           })
           .catch(console.error);
       })
       .catch(console.error);
+
+
   }
 
   private dockGetCustomActions(): CustomActionsMap {
@@ -190,6 +203,56 @@ export class AppComponent implements OnInit {
     }
   }
 
+  getThemeButton(): ToolbarButton {
+    return {
+      type: BrowserButtonType.Custom,
+      tooltip: "Theme",
+      iconUrl: `http://localhost:4200/default/dark/theme.svg`,
+      action: {
+        id: "change-theme"
+      }
+    };
+  }
+
+
+
+   async  setColorScheme(schemeType: ColorSchemeOptionType): Promise<void> {
+    console.log("Color Scheme Changed:", schemeType);
+
+
+     this.currentPalette = DEFAULT_PALETTES['dark'];
+
+    // Notify any components using the theming
+    await this.notifyColorScheme();
+  }
+
+
+
+  async notifyColorScheme(): Promise<void> {
+    const platform = getCurrentSync();
+
+    // Iterate all the browser windows and update their buttons.
+    const browserWindows = await platform.Browser.getAllWindows();
+    for (const browserWindow of browserWindows) {
+      await browserWindow.replaceToolbarOptions({ buttons: [this.getThemeButton()] });
+    }
+
+    // Broadcast a platform theme update so that views can change their colors.
+    const appSessionContextGroup = await fin.me.interop.joinSessionContextGroup("platform/events");
+    await appSessionContextGroup.setContext({
+      type: "platform.theme",
+      schemeType: 'dark',
+      palette: this.currentPalette
+    } as OpenFin.Context);
+  }
+
+  async  initColorScheme(): Promise<void> {
+    const platform = getCurrentSync();
+    const initTheme = await platform.Theme.getSelectedScheme();
+    console.log("Initial Color Scheme:", initTheme);
+    await this.setColorScheme(ColorSchemeOptionType.Dark);
+  }
+
   private async initializeWorkspacePlatform() {
     this.logService.info('Initializing workspace platform');
     // Add your platform initialization logic here
@@ -201,6 +264,9 @@ export class AppComponent implements OnInit {
           workspacePlatform: {
             pages: [],
             favicon: PLATFORM_ICON,
+            toolbarOptions: {
+              buttons: [this.getThemeButton()]
+            }
           },
         },
       },
@@ -213,6 +279,7 @@ export class AppComponent implements OnInit {
               brandPrimary: '#0A76D3',
               brandSecondary: '#383A40',
               backgroundPrimary: '#1E1F23',
+              contentBackground1: "#07243d",
             },
             light: {
               brandPrimary: '#0A76D3',
