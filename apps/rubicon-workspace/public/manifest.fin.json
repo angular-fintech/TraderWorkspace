@@ -1,0 +1,35 @@
+{
+	"devtools_port": 9090,
+	"licenseKey": "openfin-demo-license-key",
+	"runtime": {
+		"arguments": "",
+		"version": "40.130.101.1"
+	},
+	"platform": {
+		"uuid": "RubiconOpenFinWorkspace",
+		"icon": "http://localhost:4200/favicon.ico",
+		"autoShow": true,
+		"providerUrl": "http://localhost:4200/index.html",
+		"preventQuitOnLastWindowClosed": true,
+		"permissions": {
+			"System": {
+				"launchExternalProcess": true,
+				"downloadAsset": true,
+				"openUrlWithBrowser": {
+					"enabled": true,
+					"protocols": ["mailto"]
+				}
+			}
+		},
+		"defaultWindowOptions": {
+			"permissions": {
+				"System": {
+					"openUrlWithBrowser": {
+						"enabled": true,
+						"protocols": ["mailto"]
+					}
+				}
+			}
+		}
+	}
+}

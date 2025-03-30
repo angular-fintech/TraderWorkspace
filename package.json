@@ -12,6 +12,12 @@
     "@angular/platform-browser": "~19.2.0",
     "@angular/platform-browser-dynamic": "~19.2.0",
     "@angular/router": "~19.2.0",
+    "@openfin/core": "^40.104.2",
+    "@openfin/node-adapter": "^40.104.2",
+    "@openfin/workspace": "^20.1.5",
+    "@openfin/workspace-platform": "^20.1.5",
+    "@primeng/themes": "^19.0.10",
+    "primeng": "^19.0.10",
     "rxjs": "~7.8.0",
     "zone.js": "~0.15.0"
   },
