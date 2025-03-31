@@ -30,6 +30,7 @@ import { StoreProviderService } from '../services/openfin/store-provider.service
 import { AppProviderSettings } from '../models/AppProviderSettings';
 import { StorefrontProviderSettings } from '../models/StorefrontProviderSettings';
 import { DEFAULT_PALETTES } from '../themes/default-palettes';
+import { Workspace } from '@openfin/workspace-platform/client-api-platform/src/shapes';
 
 const PLATFORM_ID = 'RubiconPlatform';
 const PLATFORM_TITLE = "Rubicon Workspace";
@@ -108,11 +109,30 @@ export class AppComponent implements OnInit {
         this.logService.info('Workspace platform initialized', platform);
 
         this.initializeWorkspaceComponents()
-          .then((platform) => {
-            this.logService.info('Workspace components initialized', platform);
+          .then((platform1) => {
+            this.logService.info('Workspace components initialized', platform1);
             // this.initColorScheme().then(() => {
             //   this.logService.info('Color scheme initialized');
             // });
+
+            const platform = getCurrentSync();
+
+
+            platform.Storage.getWorkspaces().then((worksapce: Workspace[]) => {
+              console.log("Workspaces: ", worksapce);
+              // get first workspace
+              const workspace = worksapce[0];
+
+
+              // apply this workspace
+              platform.applyWorkspace(workspace, { skipPrompt: true }).then(() => {
+                console.log("Workspace applied: ", workspace);
+              }).catch(() => {
+                console.error("Error applying workspace: ");
+              });
+
+            })
+
           })
           .catch(console.error);
       })
@@ -263,10 +283,7 @@ export class AppComponent implements OnInit {
           icon: PLATFORM_ICON,
           workspacePlatform: {
             pages: [],
-            favicon: PLATFORM_ICON,
-            toolbarOptions: {
-              buttons: [this.getThemeButton()]
-            }
+            favicon: PLATFORM_ICON
           },
         },
       },
@@ -310,7 +327,7 @@ export class AppComponent implements OnInit {
       customActions: this.dockGetCustomActions(),
       // Override some of the platform callbacks to provide loading
       // and saving to custom storage
-      overrideCallback: this.workspacePlatformOverride.overrideCallback,
+      overrideCallback: this.workspacePlatformOverride.overrideCallback
     });
 
     await Notifications.register({
