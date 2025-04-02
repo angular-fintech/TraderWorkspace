@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './market-watch.component.css',
 })
 export class MarketWatchComponent {
-  ticker: string = 'MSFT';
+  ticker = 'MSFT';
 
   constructor(private logService: LogService) {}
 
