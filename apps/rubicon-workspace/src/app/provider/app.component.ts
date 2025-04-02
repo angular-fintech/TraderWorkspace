@@ -31,6 +31,9 @@ import { AppProviderSettings } from '../models/AppProviderSettings';
 import { StorefrontProviderSettings } from '../models/StorefrontProviderSettings';
 import { DEFAULT_PALETTES } from '../themes/default-palettes';
 import { Workspace } from '@openfin/workspace-platform/client-api-platform/src/shapes';
+import { InputText } from 'primeng/inputtext';
+import { Panel, PanelModule } from 'primeng/panel';
+import { FormsModule } from '@angular/forms';
 
 const PLATFORM_ID = 'RubiconPlatform';
 const PLATFORM_TITLE = "Rubicon Workspace";
@@ -39,14 +42,13 @@ const PLATFORM_ICON = "http://localhost:4200/favicon.ico";
 
 
 @Component({
-  imports: [RouterModule],
+  imports: [RouterModule, InputText, FormsModule, Panel],
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 export class AppComponent implements OnInit {
   //title = 'rubicon-workspace';
-
 
   // @ts-ignore
   private currentPalette: CustomPaletteSet;
@@ -61,6 +63,7 @@ export class AppComponent implements OnInit {
   // @ts-ignore
   private storefrontProviderSettings: StorefrontProviderSettings;
   private currentColorScheme: any;
+  ticker = 'MSFT';
 
   constructor(
     private workspacePlatformOverride: WorkspacePlatformOverrideService,
@@ -117,28 +120,26 @@ export class AppComponent implements OnInit {
 
             const platform = getCurrentSync();
 
-
+            /*
             platform.Storage.getWorkspaces().then((worksapce: Workspace[]) => {
-              console.log("Workspaces: ", worksapce);
+              console.log('Workspaces: ', worksapce);
               // get first workspace
               const workspace = worksapce[0];
 
-
               // apply this workspace
-              platform.applyWorkspace(workspace, { skipPrompt: true }).then(() => {
-                console.log("Workspace applied: ", workspace);
-              }).catch(() => {
-                console.error("Error applying workspace: ");
-              });
+              platform
+                .applyWorkspace(workspace, { skipPrompt: true })
+                .then(() => {
+                  console.log('Workspace applied: ', workspace);
+                })
+                .catch(() => {
+                  console.error('Error applying workspace: ');
+                });
+            });
+            */
+          }).catch(console.error);
 
-            })
-
-          })
-          .catch(console.error);
-      })
-      .catch(console.error);
-
-
+      }).catch(console.error);
   }
 
   private dockGetCustomActions(): CustomActionsMap {
@@ -147,6 +148,16 @@ export class AppComponent implements OnInit {
         // The favorite open is triggered when the entry in the dock is clicked
         this.logService.info(
           'Custom Actions Map: sampleButton1 clicked : ',
+          payload
+        );
+        if (payload.callerType === CustomActionCallerType.CustomButton) {
+          await this.openUrl(payload.customData);
+        }
+      },
+      sampleButton2: async (payload: CustomActionPayload): Promise<void> => {
+        // The favorite open is triggered when the entry in the dock is clicked
+        this.logService.info(
+          'Custom Actions Map: sampleButton2 clicked : ',
           payload
         );
         if (payload.callerType === CustomActionCallerType.CustomButton) {
@@ -174,14 +185,11 @@ export class AppComponent implements OnInit {
     // Open a view
     const view = await platform.createView(
       {
-        url: url,
-        name: 'New View',
-        title: 'New View',
+        url: url
       },
       browserWindowTarget
     );
-    this.currentUrl = url;
-    this.currentView = view;
+
 
     // If there was no initial window then get it and hook up event listeners
     if (!browserWindowTarget) {
@@ -226,27 +234,22 @@ export class AppComponent implements OnInit {
   getThemeButton(): ToolbarButton {
     return {
       type: BrowserButtonType.Custom,
-      tooltip: "Theme",
+      tooltip: 'Theme',
       iconUrl: `http://localhost:4200/default/dark/theme.svg`,
       action: {
-        id: "change-theme"
-      }
+        id: 'change-theme',
+      },
     };
   }
 
+  async setColorScheme(schemeType: ColorSchemeOptionType): Promise<void> {
+    console.log('Color Scheme Changed:', schemeType);
 
-
-   async  setColorScheme(schemeType: ColorSchemeOptionType): Promise<void> {
-    console.log("Color Scheme Changed:", schemeType);
-
-
-     this.currentPalette = DEFAULT_PALETTES['dark'];
+    this.currentPalette = DEFAULT_PALETTES['dark'];
 
     // Notify any components using the theming
     await this.notifyColorScheme();
   }
-
-
 
   async notifyColorScheme(): Promise<void> {
     const platform = getCurrentSync();
@@ -254,22 +257,26 @@ export class AppComponent implements OnInit {
     // Iterate all the browser windows and update their buttons.
     const browserWindows = await platform.Browser.getAllWindows();
     for (const browserWindow of browserWindows) {
-      await browserWindow.replaceToolbarOptions({ buttons: [this.getThemeButton()] });
+      await browserWindow.replaceToolbarOptions({
+        buttons: [this.getThemeButton()],
+      });
     }
 
     // Broadcast a platform theme update so that views can change their colors.
-    const appSessionContextGroup = await fin.me.interop.joinSessionContextGroup("platform/events");
+    const appSessionContextGroup = await fin.me.interop.joinSessionContextGroup(
+      'platform/events'
+    );
     await appSessionContextGroup.setContext({
-      type: "platform.theme",
+      type: 'platform.theme',
       schemeType: 'dark',
-      palette: this.currentPalette
+      palette: this.currentPalette,
     } as OpenFin.Context);
   }
 
-  async  initColorScheme(): Promise<void> {
+  async initColorScheme(): Promise<void> {
     const platform = getCurrentSync();
     const initTheme = await platform.Theme.getSelectedScheme();
-    console.log("Initial Color Scheme:", initTheme);
+    console.log('Initial Color Scheme:', initTheme);
     await this.setColorScheme(ColorSchemeOptionType.Dark);
   }
 
@@ -283,7 +290,7 @@ export class AppComponent implements OnInit {
           icon: PLATFORM_ICON,
           workspacePlatform: {
             pages: [],
-            favicon: PLATFORM_ICON
+            favicon: PLATFORM_ICON,
           },
         },
       },
@@ -296,7 +303,7 @@ export class AppComponent implements OnInit {
               brandPrimary: '#0A76D3',
               brandSecondary: '#383A40',
               backgroundPrimary: '#1E1F23',
-              contentBackground1: "#07243d",
+              contentBackground1: '#07243d',
             },
             light: {
               brandPrimary: '#0A76D3',
@@ -327,7 +334,7 @@ export class AppComponent implements OnInit {
       customActions: this.dockGetCustomActions(),
       // Override some of the platform callbacks to provide loading
       // and saving to custom storage
-      overrideCallback: this.workspacePlatformOverride.overrideCallback
+      overrideCallback: this.workspacePlatformOverride.overrideCallback,
     });
 
     await Notifications.register({
@@ -363,9 +370,20 @@ export class AppComponent implements OnInit {
         this.storeProviderService.addButtons(
           await this.storeProviderService.getApps(this.appProviderSettings)
         ),
-      getLandingPage: async () => await this.storeProviderService.getLandingPage(this.appProviderSettings, this.storefrontProviderSettings),
-      getNavigation: async () => await this.storeProviderService.getNavigation(this.appProviderSettings, this.storefrontProviderSettings),
-      getFooter: async () => await this.storeProviderService.getFooter(this.storefrontProviderSettings),
+      getLandingPage: async () =>
+        await this.storeProviderService.getLandingPage(
+          this.appProviderSettings,
+          this.storefrontProviderSettings
+        ),
+      getNavigation: async () =>
+        await this.storeProviderService.getNavigation(
+          this.appProviderSettings,
+          this.storefrontProviderSettings
+        ),
+      getFooter: async () =>
+        await this.storeProviderService.getFooter(
+          this.storefrontProviderSettings
+        ),
 
       launchApp: async () => {
         // The favorite open is triggered when the entry in the dock is clicked
@@ -412,5 +430,21 @@ export class AppComponent implements OnInit {
     };
 
     await Notifications.create(notification);
+  }
+
+  private async sendInstrumentContext() {
+    const instrument = {
+      type: 'fdc3.instrument',
+      name: 'Microsoft',
+      id: {
+        ticker: this.ticker,
+      },
+    };
+  }
+
+  sendContext($event: MouseEvent) {
+    this.sendInstrumentContext().then(() => {
+      this.logService.info('Context sent');
+    });
   }
 }

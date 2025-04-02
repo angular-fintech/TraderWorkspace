@@ -11,11 +11,19 @@
   "disableUserRearrangement": false,
   "buttons": [
     {
-      "tooltip": "Sample Button 1",
-      "iconUrl": "https://www.openfin.co/favicon-32x32.png",
+      "tooltip": "Order Blotter",
+      "iconUrl": "http://localhost:4200/OrderBlotter.png",
       "action": {
         "id": "sampleButton1",
         "customData": "http://localhost:4200/order"
+      }
+    },
+    {
+      "tooltip": "Market Watch Blotter",
+      "iconUrl": "http://localhost:4200/MarketWatch.png",
+      "action": {
+        "id": "sampleButton2",
+        "customData": "http://localhost:4200/market"
       }
     },
     {

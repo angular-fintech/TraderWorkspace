@@ -5,7 +5,8 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { LOG_CONFIG, LogConfig } from './services/logger/log-config.model';
 import { ConsoleAppender } from './services/logger/console.logger';
 import { LogLevel } from './services/logger/log-level.model';
-
+import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeng/themes/aura';
 // --- Default Configuration ---
 const DEFAULT_LOG_CONFIG: LogConfig = {
   level: LogLevel.Info, // Default level
@@ -15,9 +16,13 @@ const DEFAULT_LOG_CONFIG: LogConfig = {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimationsAsync(),
     provideRouter(appRoutes),
     { provide: LOG_CONFIG, useValue: DEFAULT_LOG_CONFIG },
+    providePrimeNG({
+      theme: {
+        preset: Aura
+      }
+    })
   ],
 };

@@ -1,2 +1,10 @@
-<h1>Welcome To OpenFin workspace</h1>
-<button (click)="showNotification($event)">Show Notification</button>
+<div>
+  <h1>Welcome To OpenFin workspace</h1>
+  <p-panel header="OpenFin Workspace">
+    <p>OpenFin Workspace is a platform for building and deploying financial applications.</p>
+    <p>It provides a set of APIs and tools for building, deploying, and managing financial applications.</p>
+  <button (click)="showNotification($event)">Show Notification</button>
+  <button (click)="sendContext($event)">SendContext</button>
+  <input type="text" pInputText [(ngModel)]="ticker" />
+  </p-panel>
+</div>

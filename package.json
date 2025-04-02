@@ -12,6 +12,7 @@
     "@angular/platform-browser": "~19.2.0",
     "@angular/platform-browser-dynamic": "~19.2.0",
     "@angular/router": "~19.2.0",
+    "@finos/fdc3": "^2.1.1",
     "@openfin/core": "^40.104.2",
     "@openfin/node-adapter": "^40.104.2",
     "@openfin/workspace": "^20.1.5",
