@@ -385,9 +385,10 @@ export class AppComponent implements OnInit {
           this.storefrontProviderSettings
         ),
 
-      launchApp: async () => {
+      launchApp: async (app) => {
         // The favorite open is triggered when the entry in the dock is clicked
-        this.logService.info('Storefront app launched');
+        this.logService.info('Storefront app launched : ', app);
+        await this.storeProviderService.launchApp(app);
       },
     });
 

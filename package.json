@@ -2,7 +2,10 @@
   "name": "@rubicon/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start": "nx run rubicon-workspace:serve",
+    "build": "nx run rubicon-workspace:build"
+  },
   "private": true,
   "dependencies": {
     "@angular/common": "~19.2.0",

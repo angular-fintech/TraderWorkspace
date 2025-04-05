@@ -1,5 +1,9 @@
 {
   "appSourceUrls": [
+    "http://localhost:4200/apps-contact.json",
+    "http://localhost:4200/apps-interop.json",
+    "http://localhost:4200/apps-native.json",
+    "http://localhost:4200/apps-tools.json"
   ],
   "manifestTypes": ["view", "snapshot", "manifest", "external", "window", "inline-appasset"],
   "cacheDurationInMinutes": 1

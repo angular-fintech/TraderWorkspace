@@ -8,7 +8,7 @@
       "description": "This is a demonstration of the hero section that you can configure for your store.",
       "cta": {
         "title": "FX Apps!",
-        "tags": ["hero"]
+        "tags": ["fx"]
       },
       "image": {
         "src": "http://localhost:4200/fx-store-front.png"
